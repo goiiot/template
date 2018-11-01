@@ -1,0 +1,70 @@
+# Copyright Go-IIoT (https://github.com/goiiot)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+-include os.mk git.mk file.mk
+
+# test of benchmark -run
+RUN ?= .
+ARGS ?= 
+
+LDFLAGS := \
+	-X main.Branch=$(BRANCH) \
+	-X main.Commit=$(COMMIT) \
+	-X main.Version=$(VERSION)
+
+RELEASE_LDFLAGS := \
+	-w -s $(LDFLAGS)
+
+TEST_FLAGS := \
+	-v -race -failfast \
+	-covermode=atomic \
+	-coverprofile=$(FILE_COVERAGE)
+
+BENCH_FLAGS := \
+	-v -race -benchmem \
+	-blockprofile=$(FILE_BLOCK_PROFILE) \
+	-cpuprofile=$(FILE_CPU_PROFILE) \
+	-memprofile=$(FILE_MEM_PROFILE) \
+	-mutexprofile=$(FILE_MUTEX_PROFILE) \
+	-o=$(FILE_TEST_BIN)
+
+build: _build_dir
+	@echo native build for $(NATIVE_OS)_$(NATIVE_ARCH)
+	go build -ldflags '$(LDFLAGS)' -o $(FILE_BINARY) $(FILE_BINARY_SOURCE)
+
+test: _test_dir
+	go test $(TEST_FLAGS) -run=$(RUN) $(PKG)
+
+coverage: test
+	go tool cover -html=$(FILE_COVERAGE)
+
+benchmark: _test_dir
+	go test $(BENCH_FLAGS) -run=Benchmark.* -bench=$(RUN) $(PKG)
+
+profile: benchmark
+	go tool pprof -http localhost:50080 $(FILE_CPU_PROFILE) $(FILE_CPU_PROFILE)
+
+release:
+	go build -ldflags '$(RELEASE_LDFLAGS)' -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
+
+run: build
+	./$(FILE_BINARY) $(ARGS)
+
+#
+#
+#
+# Reserved Area, DO NOT EDIT unless you know what you're doing
+#
+#
+#
