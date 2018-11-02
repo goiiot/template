@@ -71,7 +71,8 @@ coverage: test
 # 
 # Benchmark and profiling
 # 
-.PHONY: benchmark profile_cpu profile_mem profile_block profile_trace
+.PHONY: benchmark profile_cpu profile_mem profile_block profile_trace \
+		profile_all_start profile_all_stop
 
 benchmark: _test_dir
 	$(GO) test $(BENCH_FLAGS) -run=Benchmark.* -bench=$(RUN) $(PKG)
@@ -85,8 +86,40 @@ profile_mem:
 profile_block:
 	$(GO) tool pprof -http localhost:50082 $(FILE_TEST_BIN) $(FILE_BLOCK_PROFILE)
 
+profile_mutex:
+	$(GO) tool pprof -http localhost:50083 $(FILE_TEST_BIN) $(FILE_MUTEX_PROFILE)
+
 profile_trace:
-	$(GO) tool trace -http localhost:50083 $(FILE_TEST_BIN) $(FILE_TRACE_PROFILE)
+	$(GO) tool trace -http localhost:50084 $(FILE_TEST_BIN) $(FILE_TRACE_PROFILE)
+
+profile_all_start:
+	$(GO) tool pprof -http localhost:50080 $(FILE_TEST_BIN) $(FILE_CPU_PROFILE) \
+		& echo $$! > $(FILE_CPU_PROFILE_PID)
+	$(GO) tool pprof -http localhost:50081 $(FILE_TEST_BIN) $(FILE_MEM_PROFILE) \
+		& echo $$! > $(FILE_MEM_PROFILE_PID)
+	$(GO) tool pprof -http localhost:50082 $(FILE_TEST_BIN) $(FILE_BLOCK_PROFILE) \
+		& echo $$! > $(FILE_BLOCK_PROFILE_PID)
+	$(GO) tool pprof -http localhost:50083 $(FILE_TEST_BIN) $(FILE_MUTEX_PROFILE) \
+		& echo $$! > $(FILE_MUTEX_PROFILE_PID)
+	$(GO) tool trace -http localhost:50084 $(FILE_TEST_BIN) $(FILE_TRACE_PROFILE) \
+		& echo $$! > $(FILE_TRACE_PROFILE_PID)
+
+profile_all_stop: \
+	$(FILE_BLOCK_PROFILE_PID) $(FILE_CPU_PROFILE_PID) \
+	$(FILE_MEM_PROFILE_PID) $(FILE_MUTEX_PROFILE_PID) \
+	$(FILE_TRACE_PROFILE_PID)
+
+	kill -KILL `cat $(FILE_BLOCK_PROFILE_PID)`
+	kill -KILL `cat $(FILE_CPU_PROFILE_PID)`
+	kill -KILL `cat $(FILE_MEM_PROFILE_PID)`
+	kill -KILL `cat $(FILE_MUTEX_PROFILE_PID)`
+	kill -KILL `cat $(FILE_TRACE_PROFILE_PID)`
+
+	rm -f $(FILE_BLOCK_PROFILE_PID)
+	rm -f $(FILE_CPU_PROFILE_PID)
+	rm -f $(FILE_MEM_PROFILE_PID)
+	rm -f $(FILE_MUTEX_PROFILE_PID)
+	rm -f $(FILE_TRACE_PROFILE_PID)
 
 #
 #

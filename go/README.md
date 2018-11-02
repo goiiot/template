@@ -2,9 +2,18 @@
 
 All templates in this directory are designed for go1.11+
 
+- [Preparation](#preparation)
+- [Build](#build)
+- [Release build](#release-build)
+- [Run](#run)
+- [Test](#test)
+- [Coverage](#coverage)
+- [Benchmark](#benchmark)
+- [Profiling](#profiling)
+
 ## Preparation
 
-modify `file.mk`
+modify `file.mk` if you're building an app, it's not needed if you're building a library
 
 ```makefile
 BINARY = foo                            # change to your target binary name
@@ -89,8 +98,25 @@ run benchmarks with regex matched name
 make benchmark RUN="BenchmarkF.*" PKG=./example
 ```
 
-## Profile
+## Profiling
+
+Profile after benchmark
 
 ```bash
-make profile PKG=./example
+# run cpu profiling for last benchmark
+make profile_cpu
+
+# run memory profiling for last benchmark
+make profile_mem
+
+# run block profiling for last benchmark
+make profile_block
+
+# run trace for last benchmark
+make profile_trace
+
+# run all profiling for last benchmark
+make profile_all_start
+# don't forget to stop them after profiling finished
+make profile_all_stop
 ```

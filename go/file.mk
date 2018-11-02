@@ -48,3 +48,9 @@ FILE_CPU_PROFILE = $(DIR_TEST)/cpuprofile.out
 FILE_MEM_PROFILE = $(DIR_TEST)/memprofile.out
 FILE_MUTEX_PROFILE = $(DIR_TEST)/mutexprofile.out
 FILE_TRACE_PROFILE = $(DIR_TEST)/trace.out
+
+FILE_CPU_PROFILE_PID = $(DIR_TEST)/cpuprofile.pid
+FILE_MEM_PROFILE_PID = $(DIR_TEST)/memprofile.pid
+FILE_BLOCK_PROFILE_PID = $(DIR_TEST)/blockprofile.pid
+FILE_MUTEX_PROFILE_PID = $(DIR_TEST)/mutexprofile.pid
+FILE_TRACE_PROFILE_PID = $(DIR_TEST)/trace.pid
