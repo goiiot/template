@@ -15,3 +15,15 @@
 GO = $(shell which go)
 GIT = $(shell which git)
 UPX = $(shell which upx)
+
+ifneq ($(filter not found,$(GO)),)
+    GO = :
+endif
+
+ifneq ($(filter not found,$(GIT)),)
+    GIT = :
+endif
+
+ifneq ($(filter not found,$(UPX)),)
+    UPX = :
+endif
