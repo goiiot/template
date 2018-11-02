@@ -12,11 +12,64 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
--include os.mk git.mk file.mk tools.mk
-
-# test of benchmark -run
+# app binary output name
+BINARY = foo
+# app main source file
+FILE_BINARY_SOURCE = example/main.go
+# args for go test -run or go test -bench
 RUN ?= .
+# app arguments
 ARGS ?= 
+
+DIR_BUILD = .build
+DIR_DIST = .dist
+DIR_TEST = .test
+
+$(DIR_TEST):
+	mkdir -p $(DIR_TEST)
+
+$(DIR_BUILD):
+	mkdir -p $(DIR_BUILD)
+
+$(DIR_DIST):
+	mkdir -p $(DIR_DIST)
+
+GO = $(shell which go)
+GIT = $(shell which git)
+UPX = $(shell which upx)
+
+ifneq ($(filter not found,$(GO)),)
+    GO = :
+else ifeq ($(GO),)
+    GO = :
+endif
+
+ifneq ($(filter not found,$(GIT)),)
+    GIT = :
+else ifeq ($(GIT),)
+    GIT = :
+endif
+
+ifneq ($(filter not found,$(UPX)),)
+    UPX = :
+else ifeq ($(UPX),)
+    UPX = :
+endif
+
+GOVERSION = $(shell $(GO) version | cut -d\  -f3)
+COMMIT = $(shell $(GIT) rev-parse HEAD 2>/dev/null | tail -c 16)
+BRANCH = $(shell $(GIT) rev-parse --abbrev-ref HEAD 2>/dev/null)
+VERSION = $(shell $(GIT) describe --tags 2>/dev/null)
+
+ifeq ($(COMMIT),HEAD)
+	COMMIT = none
+endif
+ifeq ($(BRANCH),HEAD)
+	BRANCH = none
+endif
+ifeq ($(VERSION),)
+	VERSION = none
+endif
 
 LDFLAGS := \
 	-X main.branch=$(BRANCH) \
@@ -41,40 +94,55 @@ BENCH_FLAGS := \
 	-mutexprofile=$(FILE_MUTEX_PROFILE) \
 	-o=$(FILE_TEST_BIN)
 
-# 
+#
 # Build and run
-# 
+#
+
+FILE_BINARY = $(DIR_BUILD)/$(BINARY)
+FILE_RELEASE_BINARY = $(DIR_DIST)/$(BINARY)
+
 .PHONY: build release run
 
-build: _build_dir
+build: $(DIR_BUILD)
 	@echo native build for $(NATIVE_OS)_$(NATIVE_ARCH)
 	$(GO) build -ldflags '$(LDFLAGS)' -o $(FILE_BINARY) $(FILE_BINARY_SOURCE)
-
-release:
-	$(GO) build -ldflags '$(RELEASE_LDFLAGS)' -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
-	$(UPX) --brute $(FILE_RELEASE_BINARY)
 
 run: build
 	./$(FILE_BINARY) $(ARGS)
 
-# 
+release: $(DIR_DIST)
+	$(GO) build -ldflags '$(RELEASE_LDFLAGS)' -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
+
+#
 # Test and coverage
-# 
+#
+
+FILE_TEST_BIN = $(DIR_TEST)/$(BINARY).test
+FILE_COVERAGE = $(DIR_TEST)/coverage.txt
+
 .PHONY: test coverage
 
-test: _test_dir
+test: $(DIR_TEST)
 	$(GO) test $(TEST_FLAGS) -run=$(RUN) $(PKG)
 
 coverage: test
 	$(GO) tool cover -html=$(FILE_COVERAGE)
 
-# 
+#
 # Benchmark and profiling
-# 
+#
+
+FILE_BLOCK_PROFILE = $(DIR_TEST)/blockprofile.out
+FILE_CPU_PROFILE = $(DIR_TEST)/cpuprofile.out
+FILE_MEM_PROFILE = $(DIR_TEST)/memprofile.out
+FILE_MUTEX_PROFILE = $(DIR_TEST)/mutexprofile.out
+FILE_TRACE_PROFILE = $(DIR_TEST)/trace.out
+
 .PHONY: benchmark profile_cpu profile_mem profile_block profile_trace \
 		profile_all_start profile_all_stop
 
-benchmark: _test_dir
+benchmark: $(DIR_TEST)
 	$(GO) test $(BENCH_FLAGS) -run=Benchmark.* -bench=$(RUN) $(PKG)
 
 profile_cpu:
@@ -91,6 +159,12 @@ profile_mutex:
 
 profile_trace:
 	$(GO) tool trace -http localhost:50084 $(FILE_TEST_BIN) $(FILE_TRACE_PROFILE)
+
+FILE_CPU_PROFILE_PID = $(DIR_TEST)/cpuprofile.pid
+FILE_MEM_PROFILE_PID = $(DIR_TEST)/memprofile.pid
+FILE_BLOCK_PROFILE_PID = $(DIR_TEST)/blockprofile.pid
+FILE_MUTEX_PROFILE_PID = $(DIR_TEST)/mutexprofile.pid
+FILE_TRACE_PROFILE_PID = $(DIR_TEST)/trace.pid
 
 profile_all_start:
 	$(GO) tool pprof -http localhost:50080 $(FILE_TEST_BIN) $(FILE_CPU_PROFILE) \
@@ -121,7 +195,7 @@ profile_all_stop: \
 	rm -f $(FILE_MUTEX_PROFILE_PID)
 	rm -f $(FILE_TRACE_PROFILE_PID)
 
-# 
+#
 # Cleanup
 # 
 .PHONY: clean
@@ -130,11 +204,3 @@ clean:
 	rm -rf $(DIR_DIST)
 	rm -rf $(DIR_BUILD)
 	rm -rf $(DIR_TEST)
-
-#
-#
-#
-# Reserved Area, DO NOT EDIT unless you know what you're doing
-#
-#
-#
