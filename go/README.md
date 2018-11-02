@@ -7,8 +7,8 @@ All templates in this directory are designed for go1.11+
 modify `file.mk`
 
 ```makefile
-BINARY = foo
-FILE_BINARY_SOURCE = example/main.go
+BINARY = foo                            # change to your target binary name
+FILE_BINARY_SOURCE = example/main.go    # change to the path of your main file
 ```
 
 ## Build
@@ -19,7 +19,7 @@ build app
 make build
 ```
 
-## Release
+## Release build
 
 build app with `-ldflags '-w -s'`
 

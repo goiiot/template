@@ -43,7 +43,8 @@ FILE_TEST_BIN = $(DIR_TEST)/$(BINARY).test
 FILE_COVERAGE = $(DIR_TEST)/coverage.txt
 
 # benchmark files
-FILE_BLOCK_PROFILE = $(DIR_TEST)/blockprofile.txt
-FILE_CPU_PROFILE = $(DIR_TEST)/cpuprofile.txt
-FILE_MEM_PROFILE = $(DIR_TEST)/memprofile.txt
-FILE_MUTEX_PROFILE = $(DIR_TEST)/mutexprofile.txt
+FILE_BLOCK_PROFILE = $(DIR_TEST)/blockprofile.out
+FILE_CPU_PROFILE = $(DIR_TEST)/cpuprofile.out
+FILE_MEM_PROFILE = $(DIR_TEST)/memprofile.out
+FILE_MUTEX_PROFILE = $(DIR_TEST)/mutexprofile.out
+FILE_TRACE_PROFILE = $(DIR_TEST)/trace.out

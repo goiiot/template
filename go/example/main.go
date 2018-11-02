@@ -5,11 +5,20 @@ import (
 	"flag"
 )
 
+var (
+	branch, commit, version, goVersion string
+)
+
 func main() {
 	foo()
 	foo := flag.String("foo", "bar", "foo flag")
 	flag.Parse()
-	println(*foo)
+
+	println("Branch:", branch)
+	println("Commit:", commit)
+	println("Version:", version)
+	println("GoVersion:", goVersion)
+	println("Arg foo:", *foo)
 }
 
 func foo() string {

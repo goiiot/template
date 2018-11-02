@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
--include os.mk git.mk file.mk
+-include os.mk git.mk file.mk tools.mk
 
 # test of benchmark -run
 RUN ?= .
 ARGS ?= 
 
 LDFLAGS := \
-	-X main.Branch=$(BRANCH) \
-	-X main.Commit=$(COMMIT) \
-	-X main.Version=$(VERSION)
+	-X main.branch=$(BRANCH) \
+	-X main.commit=$(COMMIT) \
+	-X main.version=$(VERSION) \
+	-X main.goVersion=$(GOVERSION)
 
 RELEASE_LDFLAGS := \
 	-w -s $(LDFLAGS)
@@ -33,33 +34,59 @@ TEST_FLAGS := \
 
 BENCH_FLAGS := \
 	-v -race -benchmem \
+	-trace=$(FILE_TRACE_PROFILE) \
 	-blockprofile=$(FILE_BLOCK_PROFILE) \
 	-cpuprofile=$(FILE_CPU_PROFILE) \
 	-memprofile=$(FILE_MEM_PROFILE) \
 	-mutexprofile=$(FILE_MUTEX_PROFILE) \
 	-o=$(FILE_TEST_BIN)
 
+# 
+# Build and run
+# 
+.PHONY: build release run
+
 build: _build_dir
 	@echo native build for $(NATIVE_OS)_$(NATIVE_ARCH)
-	go build -ldflags '$(LDFLAGS)' -o $(FILE_BINARY) $(FILE_BINARY_SOURCE)
-
-test: _test_dir
-	go test $(TEST_FLAGS) -run=$(RUN) $(PKG)
-
-coverage: test
-	go tool cover -html=$(FILE_COVERAGE)
-
-benchmark: _test_dir
-	go test $(BENCH_FLAGS) -run=Benchmark.* -bench=$(RUN) $(PKG)
-
-profile: benchmark
-	go tool pprof -http localhost:50080 $(FILE_CPU_PROFILE) $(FILE_CPU_PROFILE)
+	$(GO) build -ldflags '$(LDFLAGS)' -o $(FILE_BINARY) $(FILE_BINARY_SOURCE)
 
 release:
-	go build -ldflags '$(RELEASE_LDFLAGS)' -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
+	$(GO) build -ldflags '$(RELEASE_LDFLAGS)' -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
 
 run: build
 	./$(FILE_BINARY) $(ARGS)
+
+# 
+# Test and coverage
+# 
+.PHONY: test coverage
+
+test: _test_dir
+	$(GO) test $(TEST_FLAGS) -run=$(RUN) $(PKG)
+
+coverage: test
+	$(GO) tool cover -html=$(FILE_COVERAGE)
+
+# 
+# Benchmark and profiling
+# 
+.PHONY: benchmark profile_cpu profile_mem profile_block profile_trace
+
+benchmark: _test_dir
+	$(GO) test $(BENCH_FLAGS) -run=Benchmark.* -bench=$(RUN) $(PKG)
+
+profile_cpu:
+	$(GO) tool pprof -http localhost:50080 $(FILE_TEST_BIN) $(FILE_CPU_PROFILE)
+
+profile_mem:
+	$(GO) tool pprof -http localhost:50081 $(FILE_TEST_BIN) $(FILE_MEM_PROFILE)
+
+profile_block:
+	$(GO) tool pprof -http localhost:50082 $(FILE_TEST_BIN) $(FILE_BLOCK_PROFILE)
+
+profile_trace:
+	$(GO) tool trace -http localhost:50083 $(FILE_TEST_BIN) $(FILE_TRACE_PROFILE)
 
 #
 #

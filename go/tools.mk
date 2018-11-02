@@ -12,19 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include tools.mk
-
-COMMIT = $(shell $(GIT) rev-parse HEAD 2>/dev/null | tail -c 16)
-BRANCH = $(shell $(GIT) rev-parse --abbrev-ref HEAD 2>/dev/null)
-VERSION = $(shell $(GIT) describe --tags 2>/dev/null)
-GOVERSION = $(shell $(GO) version | cut -d\  -f3)
-
-ifeq ($(COMMIT),HEAD)
-	COMMIT = none
-endif
-ifeq ($(BRANCH),HEAD)
-	BRANCH = none
-endif
-ifeq ($(VERSION),)
-	VERSION = none
-endif
+GO = $(shell which go)
+GIT = $(shell which git)
+UPX = $(shell which upx)
