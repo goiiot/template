@@ -67,7 +67,7 @@ make test PKG=./example
 run tests with regex matched name
 
 ```bash
-make test RUN=TestFo.*
+make test RUN="TestFo.*" PKG=./example
 ```
 
 ## Coverage
@@ -85,6 +85,12 @@ make coverage PKG=./example
 ```
 
 ## Benchmark
+
+run benchmarks inside current package
+
+```bash
+make benchmark
+```
 
 run benchmarks inside a package
 

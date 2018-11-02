@@ -121,6 +121,16 @@ profile_all_stop: \
 	rm -f $(FILE_MUTEX_PROFILE_PID)
 	rm -f $(FILE_TRACE_PROFILE_PID)
 
+# 
+# Cleanup
+# 
+.PHONY: clean
+
+clean:
+	rm -rf $(DIR_DIST)
+	rm -rf $(DIR_BUILD)
+	rm -rf $(DIR_TEST)
+
 #
 #
 #

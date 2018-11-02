@@ -18,7 +18,6 @@ FILE_BINARY_SOURCE = example/main.go
 DIR_BUILD = .build
 DIR_DIST = .dist
 DIR_TEST = .test
-DIR_TOOL = .tool
 
 .PHONY: _test_dir _build_dir _dist_dir _tool_dir
 
@@ -30,9 +29,6 @@ _build_dir:
 
 _dist_dir:
 	mkdir -p $(DIR_DIST)
-
-_tool_dir:
-	mkdir -p $(DIR_TOOL)
 
 # build files
 FILE_BINARY = $(DIR_BUILD)/$(BINARY)
