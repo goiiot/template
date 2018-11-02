@@ -18,12 +18,18 @@ UPX = $(shell which upx)
 
 ifneq ($(filter not found,$(GO)),)
     GO = :
+else ifeq ($(GO),)
+    GO = :
 endif
 
 ifneq ($(filter not found,$(GIT)),)
     GIT = :
+else ifeq ($(GIT),)
+    GIT = :
 endif
 
 ifneq ($(filter not found,$(UPX)),)
+    UPX = :
+else ifeq ($(UPX),)
     UPX = :
 endif
