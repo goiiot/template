@@ -12,8 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+-include ../common/os.mk
+
 # app binary output name
 BINARY = foo
+# add ext name exe when running in windows
+ifeq ($(NATIVE_OS),windows)
+	BINARY := $(BINARY).exe
+endif
+
 # app main source file
 FILE_BINARY_SOURCE = example/main.go
 # args for go test -run or go test -bench
@@ -63,8 +70,12 @@ VERSION = $(shell $(GIT) describe --tags 2>/dev/null)
 
 ifeq ($(COMMIT),HEAD)
 	COMMIT = none
+else ifeq ($(COMMIT),)
+	COMMIT = none
 endif
 ifeq ($(BRANCH),HEAD)
+	BRANCH = none
+else ifeq ($(BRANCH),)
 	BRANCH = none
 endif
 ifeq ($(VERSION),)
@@ -204,3 +215,29 @@ clean:
 	rm -rf $(DIR_DIST)
 	rm -rf $(DIR_BUILD)
 	rm -rf $(DIR_TEST)
+
+#
+# Dependency management
+#
+.PHONY: tidy ensure
+
+tidy:
+	$(GO) mod tidy
+
+ensure:
+	$(GO) mod download
+
+#
+# Image build
+#
+TAG ?= $(BINARY):latest
+CONTEXT ?= .
+DOCKERFILE ?= Dockerfile
+
+.PHONY: image run_image
+
+image:
+	docker build -t $(TAG) -f $(DOCKERFILE) $(CONTEXT)
+
+run_image:
+	docker run --rm -it $(TAG)
