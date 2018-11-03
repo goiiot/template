@@ -159,7 +159,7 @@ FILE_COVERAGE = $(DIR_TEST)/coverage.txt
 .PHONY: test coverage
 
 test: $(DIR_TEST)
-	$(GO) test $(TEST_FLAGS) -run=$(RUN) $(PKG)
+	$(GO) test $(TEST_FLAGS) -run=$(RUN) -args=$(ARGS) $(PKG)
 
 coverage: test
 	$(GO) tool cover -html=$(FILE_COVERAGE)
