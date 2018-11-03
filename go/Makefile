@@ -154,7 +154,7 @@ release: $(DIR_DIST)
 #
 
 FILE_TEST_BIN = $(DIR_TEST)/$(BINARY).test
-FILE_COVERAGE = $(DIR_TEST)/coverage.txt
+FILE_COVERAGE = coverage.txt
 
 .PHONY: test coverage
 

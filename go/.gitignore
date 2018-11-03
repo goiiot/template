@@ -2,3 +2,8 @@
 /.dist
 /.test
 /.tool
+
+coverage.txt
+
+*.out
+*.test
