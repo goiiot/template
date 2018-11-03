@@ -13,7 +13,7 @@ All templates in this directory are designed for go1.11+
 
 ## Preparation
 
-modify `file.mk` if you're building an app, it's not needed if you're building a library
+modify `Makefile` if you're building an app, it's not needed if you're building a library
 
 ```makefile
 BINARY = foo                            # change to your target binary name
