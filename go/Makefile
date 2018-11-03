@@ -46,6 +46,7 @@ $(DIR_DIST):
 #
 
 GO = $(shell which go)
+GOFMT = $(shell which gofmt)
 GIT = $(shell which git)
 UPX = $(shell which upx)
 DOCKER = $(shell which docker)
@@ -54,6 +55,12 @@ ifneq ($(filter not found,$(GO)),)
     GO = :
 else ifeq ($(GO),)
     GO = :
+endif
+
+ifneq ($(filter not found,$(GOFMT)),)
+    GOFMT = :
+else ifeq ($(GOFMT),)
+    GOFMT = :
 endif
 
 ifneq ($(filter not found,$(GIT)),)
@@ -224,19 +231,21 @@ profile_all_stop: \
 	rm -f $(FILE_TRACE_PROFILE_PID)
 
 #
-# Cleanup
+# Format
 #
 
-.PHONY: clean
+.PHONY: fmt style_check
 
-clean:
-	rm -rf $(DIR_DIST)
-	rm -rf $(DIR_BUILD)
-	rm -rf $(DIR_TEST)
+fmt:
+	gofmt -s -w .
+
+style_check:
+	set -e; gofmt -s -e -d . 1>&2
 
 #
 # Dependency management
 #
+
 .PHONY: tidy ensure
 
 tidy:
@@ -259,3 +268,14 @@ image:
 
 run_image:
 	$(DOCKER) run --rm -it $(TAG)
+
+#
+# Cleanup
+#
+
+.PHONY: clean
+
+clean:
+	rm -rf $(DIR_DIST)
+	rm -rf $(DIR_BUILD)
+	rm -rf $(DIR_TEST)
