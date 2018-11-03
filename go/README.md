@@ -126,3 +126,31 @@ make profile_all_start
 # don't forget to stop them after profiling finished
 make profile_all_stop
 ```
+
+## Build image
+
+build image with tag `${BINARY}:latest`
+
+```bash
+make image
+```
+
+build image with custom tag
+
+```bash
+make image TAG="foo:bar"
+```
+
+## Run via image
+
+run container via built image with tag `${BINARY}:latest`
+
+```bash
+make run_image
+```
+
+run container via image with custom tag
+
+```bash
+make run_image TAG="foo:bar"
+```

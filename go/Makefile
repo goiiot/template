@@ -16,7 +16,7 @@
 
 # app binary output name
 BINARY = foo
-# add ext name exe when running in windows
+# add ext name (.exe) when running in windows
 ifeq ($(NATIVE_OS),windows)
 	BINARY := $(BINARY).exe
 endif
@@ -41,9 +41,14 @@ $(DIR_BUILD):
 $(DIR_DIST):
 	mkdir -p $(DIR_DIST)
 
+#
+# Tools
+#
+
 GO = $(shell which go)
 GIT = $(shell which git)
 UPX = $(shell which upx)
+DOCKER = $(shell which docker)
 
 ifneq ($(filter not found,$(GO)),)
     GO = :
@@ -63,6 +68,16 @@ else ifeq ($(UPX),)
     UPX = :
 endif
 
+ifneq ($(filter not found,$(DOCKER)),)
+    DOCKER = :
+else ifeq ($(DOCKER),)
+    DOCKER = :
+endif
+
+#
+# Version and git info
+#
+
 GOVERSION = $(shell $(GO) version | cut -d\  -f3)
 COMMIT = $(shell $(GIT) rev-parse HEAD 2>/dev/null | tail -c 16)
 BRANCH = $(shell $(GIT) rev-parse --abbrev-ref HEAD 2>/dev/null)
@@ -73,11 +88,13 @@ ifeq ($(COMMIT),HEAD)
 else ifeq ($(COMMIT),)
 	COMMIT = none
 endif
+
 ifeq ($(BRANCH),HEAD)
 	BRANCH = none
 else ifeq ($(BRANCH),)
 	BRANCH = none
 endif
+
 ifeq ($(VERSION),)
 	VERSION = none
 endif
@@ -208,7 +225,8 @@ profile_all_stop: \
 
 #
 # Cleanup
-# 
+#
+
 .PHONY: clean
 
 clean:
@@ -237,7 +255,7 @@ DOCKERFILE ?= Dockerfile
 .PHONY: image run_image
 
 image:
-	docker build -t $(TAG) -f $(DOCKERFILE) $(CONTEXT)
+	$(DOCKER) build -t $(TAG) -f $(DOCKERFILE) $(CONTEXT)
 
 run_image:
-	docker run --rm -it $(TAG)
+	$(DOCKER) run --rm -it $(TAG)

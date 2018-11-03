@@ -1,3 +1,7 @@
 # Template
 
-Template files for projects in [`golang`](./go) and more (in future)
+Template files for your projects
+
+## Supported language
+
+- [`Golang`](./go)
