@@ -239,8 +239,9 @@ profile_all_stop: \
 fmt:
 	gofmt -s -w .
 
-style_check:
-	set -e; gofmt -s -e -d . 1>&2
+style_check: $(DIR_TEST)
+	gofmt -s -e -d . | tee $(DIR_TEST)/fmt.out
+	grep -q 'diff' $(DIR_TEST)/fmt.out; test $$? -eq 1
 
 #
 # Dependency management
