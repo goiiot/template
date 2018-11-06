@@ -1,9 +1,20 @@
+# temporary directories
+
 /.build
 /.dist
 /.test
 /.tool
 
+# coverage report
+
 coverage.txt
+
+# test binary files and report output
 
 *.out
 *.test
+
+# editors
+
+/.vscode
+/.idea
