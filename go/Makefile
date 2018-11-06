@@ -13,7 +13,11 @@
 # limitations under the License.
 
 # Enable oneshell
-# .ONESHELL:
+#.ONESHELL:
+
+# Use custom interpreter
+#SHELL = /bin/bash
+#.SHELLFLAGS = -x
 
 -include ../common/os.mk
 
