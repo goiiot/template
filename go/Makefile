@@ -106,6 +106,13 @@ ifeq ($(VERSION),)
 	VERSION = none
 endif
 
+#
+# Build and run
+#
+
+FILE_BINARY = $(DIR_BUILD)/$(BINARY)
+FILE_RELEASE_BINARY = $(DIR_DIST)/$(BINARY)
+
 LDFLAGS := \
 	-X main.branch=$(BRANCH) \
 	-X main.commit=$(COMMIT) \
@@ -114,27 +121,6 @@ LDFLAGS := \
 
 RELEASE_LDFLAGS := \
 	-w -s $(LDFLAGS)
-
-TEST_FLAGS := \
-	-v -race -failfast \
-	-covermode=atomic \
-	-coverprofile=$(FILE_COVERAGE)
-
-BENCH_FLAGS := \
-	-v -race -benchmem \
-	-trace=$(FILE_TRACE_PROFILE) \
-	-blockprofile=$(FILE_BLOCK_PROFILE) \
-	-cpuprofile=$(FILE_CPU_PROFILE) \
-	-memprofile=$(FILE_MEM_PROFILE) \
-	-mutexprofile=$(FILE_MUTEX_PROFILE) \
-	-o=$(FILE_TEST_BIN)
-
-#
-# Build and run
-#
-
-FILE_BINARY = $(DIR_BUILD)/$(BINARY)
-FILE_RELEASE_BINARY = $(DIR_DIST)/$(BINARY)
 
 .PHONY: build release run
 
@@ -156,6 +142,11 @@ release: $(DIR_DIST)
 FILE_TEST_BIN = $(DIR_TEST)/$(BINARY).test
 FILE_COVERAGE = coverage.txt
 
+TEST_FLAGS := \
+	-v -race -failfast \
+	-covermode=atomic \
+	-coverprofile=$(FILE_COVERAGE)
+
 .PHONY: test coverage
 
 test: $(DIR_TEST)
@@ -173,6 +164,15 @@ FILE_CPU_PROFILE = $(DIR_TEST)/cpuprofile.out
 FILE_MEM_PROFILE = $(DIR_TEST)/memprofile.out
 FILE_MUTEX_PROFILE = $(DIR_TEST)/mutexprofile.out
 FILE_TRACE_PROFILE = $(DIR_TEST)/trace.out
+
+BENCH_FLAGS := \
+	-v -race -benchmem \
+	-trace=$(FILE_TRACE_PROFILE) \
+	-blockprofile=$(FILE_BLOCK_PROFILE) \
+	-cpuprofile=$(FILE_CPU_PROFILE) \
+	-memprofile=$(FILE_MEM_PROFILE) \
+	-mutexprofile=$(FILE_MUTEX_PROFILE) \
+	-o=$(FILE_TEST_BIN)
 
 .PHONY: benchmark profile_cpu profile_mem profile_block profile_trace \
 		profile_all_start profile_all_stop
