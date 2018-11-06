@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Enable oneshell
+# .ONESHELL:
+
 -include ../common/os.mk
 
 # app binary output name
-BINARY = foo
+BINARY ?= foo
 # add ext name (.exe) when running in windows
 ifeq ($(NATIVE_OS),windows)
 	BINARY := $(BINARY).exe
@@ -119,20 +122,22 @@ LDFLAGS := \
 	-X main.version=$(VERSION) \
 	-X main.goVersion=$(GOVERSION)
 
-RELEASE_LDFLAGS := \
-	-w -s $(LDFLAGS)
+BUILD_ARGS := -race -ldflags '$(LDFLAGS)'
+
+RELEASE_LDFLAGS := -w -s $(LDFLAGS)
+
+RELEASE_FLAGS := -ldflags='$(RELEASE_LDFLAGS)'
 
 .PHONY: build release run
 
 build: $(DIR_BUILD)
-	@echo native build for $(NATIVE_OS)_$(NATIVE_ARCH)
-	$(GO) build -ldflags '$(LDFLAGS)' -o $(FILE_BINARY) $(FILE_BINARY_SOURCE)
+	$(GO) build $(BUILD_ARGS) -o $(FILE_BINARY) $(FILE_BINARY_SOURCE)
 
 run: build
 	./$(FILE_BINARY) $(ARGS)
 
 release: $(DIR_DIST)
-	$(GO) build -ldflags '$(RELEASE_LDFLAGS)' -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
+	$(GO) build -buildmode=pie $(RELEASE_FLAGS) -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
 	$(UPX) --brute $(FILE_RELEASE_BINARY)
 
 #
@@ -280,3 +285,80 @@ clean:
 	rm -rf $(DIR_DIST)
 	rm -rf $(DIR_BUILD)
 	rm -rf $(DIR_TEST)
+
+#
+# Cross platform release
+#
+
+X_BIN := $(BINARY)
+export X_BIN
+RELEASE_CMD = $(GO) build $(RELEASE_FLAGS) -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
+
+.PHONY: x_all
+
+x_all: x_linux_all x_darwin_all x_windows_all
+
+.PHONY: x_linux_all \
+		x_linux_amd64 x_linux_x86 x_linux_arm64 x_linux_armv7 \
+		x_linux_armv6 x_linux_armv5
+
+x_linux_all: \
+		x_linux_amd64 x_linux_x86 x_linux_arm64 x_linux_armv7 \
+		x_linux_armv6 x_linux_armv5
+
+x_linux_amd64:
+	$(eval BINARY = linux_amd64_$$(X_BIN))
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(RELEASE_CMD)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
+
+x_linux_x86:
+	$(eval BINARY = linux_x86_$$(X_BIN))
+	CGO_ENABLED=0 GOOS=linux GOARCH=386 $(RELEASE_CMD)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
+
+x_linux_arm64:
+	$(eval BINARY = linux_arm64_$$(X_BIN))
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(RELEASE_CMD)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
+
+x_linux_armv7:
+	$(eval BINARY = linux_armv7_$$(X_BIN))
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 $(RELEASE_CMD)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
+
+x_linux_armv6:
+	$(eval BINARY = linux_armv6_$$(X_BIN))
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=6 $(RELEASE_CMD)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
+
+x_linux_armv5:
+	$(eval BINARY = linux_armv5_$$(X_BIN))
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=5 $(RELEASE_CMD)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
+
+.PHONY: x_windows_all \
+		x_windows_amd64 x_windows_x86
+
+x_windows_all: \
+		x_windows_amd64 x_windows_x86
+
+x_windows_amd64:
+	$(eval BINARY = windows_amd64_$$(X_BIN))
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 $(RELEASE_CMD)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
+
+x_windows_x86:
+	$(eval BINARY = windows_x86_$$(X_BIN))
+	CGO_ENABLED=0 GOOS=windows GOARCH=386 $(RELEASE_CMD)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
+
+.PHONY: x_darwin_all \
+		x_darwin_amd64
+
+x_darwin_all: \
+		x_darwin_amd64
+
+x_darwin_amd64:
+	$(eval BINARY = windows_x86_$$(X_BIN))
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 $(RELEASE_CMD)
+	$(UPX) --brute $(FILE_RELEASE_BINARY)
