@@ -126,7 +126,7 @@ LDFLAGS := \
 	-X main.version=$(VERSION) \
 	-X main.goVersion=$(GOVERSION)
 
-BUILD_ARGS := -race -ldflags '$(LDFLAGS)'
+BUILD_ARGS := -ldflags '$(LDFLAGS)'
 
 RELEASE_LDFLAGS := -w -s $(LDFLAGS)
 
@@ -141,7 +141,7 @@ run: build
 	./$(FILE_BINARY) $(ARGS)
 
 release: $(DIR_DIST)
-	$(GO) build -buildmode=pie $(RELEASE_FLAGS) -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
+	$(GO) build $(RELEASE_FLAGS) -o $(FILE_RELEASE_BINARY) $(FILE_BINARY_SOURCE)
 	$(UPX) --brute $(FILE_RELEASE_BINARY)
 
 #
